@@ -16,4 +16,8 @@ class URS extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+    public function specificationProducts()
+    {
+        return $this->hasMany(SpesifikasiProduct::class);
+    }
 }
