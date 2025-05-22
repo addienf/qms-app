@@ -8,9 +8,13 @@ use App\Models\Profile\Customer;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,9 +60,17 @@ class CustomerResource extends Resource
             ])
             ->actions([
                 ActionGroup::make([
-                    Tables\Actions\ViewAction::make()->color('success'),
-                    Tables\Actions\EditAction::make()->slideOver()->color('warning'),
-                    Tables\Actions\DeleteAction::make(),
+                    ViewAction::make()->color('success'),
+                    EditAction::make()->slideOver()->color('warning'),
+                    DeleteAction::make()
+                        ->successNotification(null)
+                        ->after(function ($record) {
+                            Notification::make()
+                                ->title('Customer deleted successfully')
+                                ->body("The customer \"{$record->name}\" has been permanently removed.")
+                                ->danger()
+                                ->send();
+                        }),
                 ]),
             ])
             ->bulkActions([
