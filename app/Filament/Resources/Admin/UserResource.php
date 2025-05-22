@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
@@ -35,7 +36,13 @@ class UserResource extends Resource
                 //
                 TextInput::make('name')->required(),
                 TextInput::make('email')->required(),
-                TextInput::make('password')->password()->required(),
+                TextInput::make('password')->password()->required()->revealable()->visibleOn('create')
+                    ->rule('regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/')
+                    ->helperText('Minimal 8 karakter, ada huruf besar, huruf kecil, dan angka')
+                    ->validationMessages([
+                        'required' => 'The password field is required.',
+                        'regex' => 'The password must be at least 8 characters and include at least one uppercase letter, one lowercase letter, and one number.',
+                    ]),
                 Select::make('role')->label('Role User')->label('Role User')
                     ->options(config('roles.user_roles'))
             ]);
@@ -57,7 +64,15 @@ class UserResource extends Resource
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make()->color('success'),
                     Tables\Actions\EditAction::make()->slideOver()->color('warning'),
-                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                        ->successNotification(null)
+                        ->after(function ($record) {
+                            Notification::make()
+                                ->title('User deleted successfully')
+                                ->body("The User \"{$record->name}\" has been permanently removed.")
+                                ->danger()
+                                ->send();
+                        }),
                 ]),
             ])
             ->bulkActions([
