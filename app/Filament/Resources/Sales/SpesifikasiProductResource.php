@@ -31,6 +31,7 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
+use Illuminate\Support\Facades\Storage;
 
 class SpesifikasiProductResource extends Resource
 {
@@ -109,7 +110,7 @@ class SpesifikasiProductResource extends Resource
                             ->label('Nama PIC')
                             ->required(),
                         static::getSignature()->columnSpanFull(),
-                    ])->columns(2)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()
+                    ])->columns(2)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()->disableItemCreation()->disableItemDeletion()
             ]);
     }
 
@@ -153,17 +154,7 @@ class SpesifikasiProductResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
-            ->schema([
-                TextEntry::make('urs.customer.name')->label('Customer Name'),
-                TextEntry::make('urs.no_urs')->label('No URS'),
-                TextEntry::make('date'),
-                TextEntry::make('delivery_address'),
-                RepeatableEntry::make('specificationProducts')->label('Products')
-                    ->schema([
-                        TextEntry::make('product.product_name'),
-                        TextEntry::make('quantity'),
-                    ])->columns(2)->columnSpanFull(),
-            ]);
+            ->schema([]);
     }
 
     public static function getRelations(): array
@@ -186,11 +177,16 @@ class SpesifikasiProductResource extends Resource
     {
         return SignaturePad::make('pic_signature')
             ->label('Tanda Tangan')
+            ->reactive()
             ->afterStateUpdated(function ($state, callable $set, $get, $livewire) {
                 if (!$state) {
                     return;
                 }
-                $oldPath = $get('pic_signature') ?? null;
+                $oldPath = null;
+                if ($livewire->record && $livewire->record->productPics) {
+                    $picModel = optional($livewire->record->productPics)->first();
+                    $oldPath = optional($picModel)->pic_signature;
+                }
                 $newPath = SpesifikasiProductPIC::handleSignature($state, $oldPath);
                 $set('pic_signature', $newPath);
             });

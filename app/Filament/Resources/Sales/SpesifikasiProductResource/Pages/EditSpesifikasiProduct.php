@@ -12,6 +12,13 @@ class EditSpesifikasiProduct extends EditRecord
 {
     protected static string $resource = SpesifikasiProductResource::class;
 
+    protected static bool $canCreateAnother = false;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
     protected function getSavedNotification(): ?Notification
     {
         return Notification::make()
