@@ -4,9 +4,11 @@ namespace App\Filament\Resources\Sales;
 
 use App\Filament\Resources\Sales\SpesifikasiProductResource\Pages;
 use App\Filament\Resources\Sales\SpesifikasiProductResource\RelationManagers;
+use App\Models\Sales\Pivot\SpesifikasiProductPIC;
 use App\Models\Sales\SpesifikasiProduct;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
@@ -28,6 +30,7 @@ use Filament\Infolists;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class SpesifikasiProductResource extends Resource
 {
@@ -44,7 +47,6 @@ class SpesifikasiProductResource extends Resource
         return $form
             ->schema([
                 //
-
                 Grid::make(4)
                     ->schema([
                         Select::make('urs_id')->label('No URS')->required()
@@ -74,7 +76,6 @@ class SpesifikasiProductResource extends Resource
                                             ->required()
                                             ->columnSpan(1),
                                     ]),
-
                                 Repeater::make('specification')
                                     ->label('Pilih Spesifikasi')
                                     ->schema([
@@ -90,24 +91,24 @@ class SpesifikasiProductResource extends Resource
                                             ->label('Nilai')
                                             ->visible(fn($get) => !in_array($get('name'), ['water_feeding_system', 'software']))
                                             ->columnSpan(1),
-                                        Repeater::make('detailInformation')->label('File Pendukung')->relationship()
-                                            ->schema([
-                                                TextInput::make('file_path')->label('File Path')->required(),
-                                            ])->columns(1)->defaultItems(1)->minItems(1)->maxItems(1)
                                     ])->columns(2)->defaultItems(1)->columnSpanFull()->addActionLabel('Add Specification'),
+                                Repeater::make('detailInformation')->label('Detail Information')->relationship()
+                                    ->schema([
+                                        FileUpload::make('file_path')->label('File Pendukung')
+                                            ->directory('Sales/Spesifikasi/Document')
+                                            ->acceptedFileTypes(['application/pdf'])
+                                            ->maxSize(10240)
+                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.')
+                                    ])->columns(1)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()->disableItemCreation()->disableItemDeletion()
                             ])->columns(1)->addActionLabel('Add Product'),
                     ]),
                 RichEditor::make('detail_specification')->required()->columnSpanFull(),
-                Repeater::make('productPics')
-                    ->label('PIC')
-                    ->relationship() // relasi ke SpesifikasiProductPic
+                Repeater::make('productPics')->label('PIC')->relationship()
                     ->schema([
-                        Forms\Components\TextInput::make('pic_name')
+                        TextInput::make('pic_name')
                             ->label('Nama PIC')
                             ->required(),
-                        Forms\Components\TextInput::make('pic_signature')
-                            ->label('Tanda Tangan (path atau base64)')
-                            ->required(),
+                        static::getSignature()->columnSpanFull(),
                     ])->columns(2)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()
             ]);
     }
@@ -121,6 +122,8 @@ class SpesifikasiProductResource extends Resource
                 TextColumn::make('urs.no_urs')->label('No URS')->searchable()->sortable(),
                 TextColumn::make('date')->searchable()->sortable(),
                 TextColumn::make('delivery_address')->searchable()->sortable(),
+                TextColumn::make('specificationProducts.detailInformation.file_path')->searchable()->sortable()->label('File')
+                    ->formatStateUsing(fn($state) => $state ? basename($state) : '-'),
             ])
             ->filters([
                 //
@@ -177,5 +180,19 @@ class SpesifikasiProductResource extends Resource
             'create' => Pages\CreateSpesifikasiProduct::route('/create'),
             'edit' => Pages\EditSpesifikasiProduct::route('/{record}/edit'),
         ];
+    }
+
+    public static function getSignature(): SignaturePad
+    {
+        return SignaturePad::make('pic_signature')
+            ->label('Tanda Tangan')
+            ->afterStateUpdated(function ($state, callable $set, $get, $livewire) {
+                if (!$state) {
+                    return;
+                }
+                $oldPath = $get('pic_signature') ?? null;
+                $newPath = SpesifikasiProductPIC::handleSignature($state, $oldPath);
+                $set('pic_signature', $newPath);
+            });
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Inventory\Product;
 use App\Models\Sales\SpesifikasiProduct;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class SpesifikasiProductDetail extends Model
 {
@@ -30,5 +31,20 @@ class SpesifikasiProductDetail extends Model
     public function detailInformation()
     {
         return $this->hasOne(DetailInformation::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($detail) {
+            if ($detail->detailInformation) {
+                $filePath = $detail->detailInformation->file_path;
+
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+
+                $detail->detailInformation->delete();
+            }
+        });
     }
 }
