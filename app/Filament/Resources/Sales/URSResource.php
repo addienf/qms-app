@@ -18,7 +18,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Section;
 
 class URSResource extends Resource
 {
@@ -30,31 +29,16 @@ class URSResource extends Resource
     protected static ?string $pluralLabel = 'URS';
     protected static ?string $modelLabel = 'URS';
 
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make()
-                    ->description('Silakan isi data permintaan URS di bawah ini.')
-                    ->schema([
-                        TextInput::make('no_urs')
-                            ->label('No URS')
-                            ->required()
-                            ->helperText('Format: XXX/QKS/MKT/URS/MM/YY'),
-
-                        Select::make('customer_id')
-                            ->label('Customer')
-                            ->required()
-                            ->relationship('customer', 'name'),
-
-                        RichEditor::make('remark_permintaan_khusus')
-                            ->label('Permintaan Khusus')
-                            ->required()
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(1)
-                    ->extraAttributes(['class' => 'border border-blue-300 rounded-lg']),
+                //
+                TextInput::make('no_urs')->label('No URS')->required()
+                    ->helperText('Format: XXX/QKS/MKT/URS/MM/YY'),
+                Select::make('customer_id')->label('Customer')->required()
+                    ->relationship('customer', 'name'),
+                RichEditor::make('remark_permintaan_khusus')->label('Permintaan Khusus')->required()->columnSpanFull()
             ]);
     }
 

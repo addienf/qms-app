@@ -24,8 +24,6 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->brandLogo(asset('asset/logo.png'))
-            ->brandLogoHeight(height: '150px')
             ->default()
             ->id('admin')
             ->path('admin')
@@ -34,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->emailVerification()
             ->colors([
-                'primary' => '#005792',
+                'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
