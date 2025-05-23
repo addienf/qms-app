@@ -6,6 +6,8 @@ use App\Models\Sales\Pivot\SpesifikasiProductDetail;
 use App\Models\Sales\Pivot\SpesifikasiProductPIC;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SpesifikasiProduct extends Model
 {
@@ -36,5 +38,22 @@ class SpesifikasiProduct extends Model
     public function specificationProducts()
     {
         return $this->hasMany(SpesifikasiProductDetail::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($spesifikasi) {
+            foreach ($spesifikasi->specificationProducts as $detail) {
+                if ($detail->detailInformation) {
+                    $detail->detailInformation->delete();
+                }
+                $detail->delete();
+            }
+
+            // Delete all PICs
+            foreach ($spesifikasi->productPics as $pic) {
+                $pic->delete();
+            }
+        });
     }
 }
