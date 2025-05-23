@@ -10,6 +10,8 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -101,5 +103,14 @@ class URSResource extends Resource
             'create' => Pages\CreateURS::route('/create'),
             'edit' => Pages\EditURS::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('customer.name')->label('Customer Name'),
+                TextEntry::make('no_urs')->label('No URS'),
+            ]);
     }
 }
