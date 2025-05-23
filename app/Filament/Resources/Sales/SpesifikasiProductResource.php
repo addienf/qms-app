@@ -44,7 +44,6 @@ class SpesifikasiProductResource extends Resource
         return $form
             ->schema([
                 //
-
                 Grid::make(4)
                     ->schema([
                         Select::make('urs_id')->label('No URS')->required()
@@ -54,10 +53,12 @@ class SpesifikasiProductResource extends Resource
                         ToggleButtons::make('is_stock')->boolean()->required()->inline()->inlineLabel(false)
                             ->label('Stock')
                     ]),
-                Section::make('Product Request')
+                Section::make('')
+                    ->description('Silakan isi data permintaan URS di bawah ini.')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
                         Repeater::make('specificationProducts')
-                            ->label('Pilih Product')
+                            ->label('Pilih Produk')
                             ->relationship()
                             ->schema([
                                 Grid::make(2)
@@ -74,7 +75,6 @@ class SpesifikasiProductResource extends Resource
                                             ->required()
                                             ->columnSpan(1),
                                     ]),
-
                                 Repeater::make('specification')
                                     ->label('Pilih Spesifikasi')
                                     ->schema([
@@ -97,8 +97,10 @@ class SpesifikasiProductResource extends Resource
                                     ])->columns(2)->defaultItems(1)->columnSpanFull()->addActionLabel('Add Specification'),
                             ])->columns(1)->addActionLabel('Add Product'),
                     ]),
-                RichEditor::make('detail_specification')->required()->columnSpanFull(),
+                RichEditor::make('detail_specification')->required()->columnSpanFull()
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50']),
                 Repeater::make('productPics')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->label('PIC')
                     ->relationship() // relasi ke SpesifikasiProductPic
                     ->schema([
@@ -116,12 +118,13 @@ class SpesifikasiProductResource extends Resource
     {
         return $table
             ->columns([
-                //
+
                 TextColumn::make('urs.customer.name')->searchable()->sortable(),
                 TextColumn::make('urs.no_urs')->label('No URS')->searchable()->sortable(),
                 TextColumn::make('date')->searchable()->sortable(),
                 TextColumn::make('delivery_address')->searchable()->sortable(),
             ])
+
             ->filters([
                 //
             ])
@@ -151,7 +154,9 @@ class SpesifikasiProductResource extends Resource
     {
         return $infolist
             ->schema([
-                TextEntry::make('urs.customer.name')->label('Customer Name'),
+                TextEntry::make('urs.customer.name')->label('Customer Name')->extraAttributes([
+                    'class' => 'border-2 border-red-500 rounded-md',
+                ]),
                 TextEntry::make('urs.no_urs')->label('No URS'),
                 TextEntry::make('date'),
                 TextEntry::make('delivery_address'),

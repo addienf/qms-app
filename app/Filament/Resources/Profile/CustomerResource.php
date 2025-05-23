@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Filament\Forms\Components\Section;
 
 class CustomerResource extends Resource
 {
@@ -35,15 +36,33 @@ class CustomerResource extends Resource
     {
         return $form
             ->schema([
-                //
-                TextInput::make('name')->label('Customer Name')->required(),
-                TextInput::make('department')->required(),
-                PhoneInput::make('phone_number')->required(),
-                TextInput::make('company_name')->required(),
-                TextInput::make('company_address')->required()
+                Section::make('')
+                    ->description('Lengkapi data Customer.')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md p-4 dark:border-blue-50'])
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Customer Name')
+                            ->required(),
+
+                        TextInput::make('department')
+                            ->label('Department')
+                            ->required(),
+
+                        PhoneInput::make('phone_number')
+                            ->label('Phone Number')
+                            ->required(),
+
+                        TextInput::make('company_name')
+                            ->label('Company Name')
+                            ->required(),
+
+                        TextInput::make('company_address')
+                            ->label('Company Address')
+                            ->required(),
+                    ])
+                    ->columns(2), // 2 kolom agar tampilan lebih efisien
             ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
