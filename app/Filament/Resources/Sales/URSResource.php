@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
 
 class URSResource extends Resource
 {
@@ -33,14 +34,25 @@ class URSResource extends Resource
     {
         return $form
             ->schema([
-                //
-                TextInput::make('no_urs')->label('No URS')->required()
-                    ->helperText('Format: XXX/QKS/MKT/URS/MM/YY'),
-                Select::make('customer_id')->label('Customer')->required()
-                    ->relationship('customer', 'name'),
-                RichEditor::make('remark_permintaan_khusus')->label('Permintaan Khusus')->required()->columnSpanFull()
+                Section::make('')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
+                    ->schema([
+                        TextInput::make('no_urs')
+                            ->label('No URS')
+                            ->required()
+                            ->helperText('Format: XXX/QKS/MKT/URS/MM/YY'),
+                        Select::make('customer_id')
+                            ->label('Customer')
+                            ->required()
+                            ->relationship('customer', 'name'),
+                        RichEditor::make('remark_permintaan_khusus')
+                            ->label('Permintaan Khusus')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
