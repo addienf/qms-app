@@ -10,7 +10,6 @@ use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
@@ -47,17 +46,26 @@ class SpesifikasiProductResource extends Resource
     {
         return $form
             ->schema([
-                //
                 Grid::make(4)
                     ->schema([
-                        Select::make('urs_id')->label('No URS')->required()
+                        Select::make('urs_id')
+                            ->label('No URS')
+                            ->required()
                             ->relationship('urs', 'no_urs'),
-                        DatePicker::make('date')->label('Tanggal Dibuat')->required(),
-                        TextInput::make('delivery_address')->required(),
-                        ToggleButtons::make('is_stock')->boolean()->required()->inline()->inlineLabel(false)
-                            ->label('Stock')
+                        DatePicker::make('date')
+                            ->label('Tanggal Dibuat')
+                            ->required(),
+                        TextInput::make('delivery_address')
+                            ->required(),
+                        ToggleButtons::make('is_stock')
+                            ->boolean()
+                            ->required()
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->label('Stock'),
                     ]),
                 Section::make('Product Request')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
                         Repeater::make('specificationProducts')
                             ->label('Pilih Product')
@@ -80,37 +88,74 @@ class SpesifikasiProductResource extends Resource
                                 Repeater::make('specification')
                                     ->label('Pilih Spesifikasi')
                                     ->schema([
-                                        Select::make('name')->reactive()->required()
+                                        Select::make('name')
+                                            ->reactive()
+                                            ->required()
                                             ->label('Jenis Spesifiaksi')
                                             ->options(config('spec_config.spesifikasi'))
                                             ->columnSpan(1),
-                                        ToggleButtons::make('value')->boolean()->required()->inline()->inlineLabel(false)
+                                        ToggleButtons::make('value')
+                                            ->boolean()
+                                            ->required()
+                                            ->inline()
+                                            ->inlineLabel(false)
                                             ->label('Nilai')
                                             ->visible(fn($get) => in_array($get('name'), ['water_feeding_system', 'software']))
                                             ->columnSpan(1),
-                                        TextInput::make('value')->required()
+                                        TextInput::make('value')
+                                            ->required()
                                             ->label('Nilai')
                                             ->visible(fn($get) => !in_array($get('name'), ['water_feeding_system', 'software']))
                                             ->columnSpan(1),
-                                    ])->columns(2)->defaultItems(1)->columnSpanFull()->addActionLabel('Add Specification'),
-                                Repeater::make('detailInformation')->label('Detail Information')->relationship()
+                                    ])
+                                    ->columns(2)
+                                    ->defaultItems(1)
+                                    ->columnSpanFull()
+                                    ->addActionLabel('Add Specification'),
+                                Repeater::make('detailInformation')
+                                    ->label('Detail Information')
+                                    ->relationship()
                                     ->schema([
-                                        FileUpload::make('file_path')->label('File Pendukung')
+                                        FileUpload::make('file_path')
+                                            ->label('File Pendukung')
                                             ->directory('Sales/Spesifikasi/Document')
                                             ->acceptedFileTypes(['application/pdf'])
                                             ->maxSize(10240)
-                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.')
-                                    ])->columns(1)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()->disableItemCreation()->disableItemDeletion()
-                            ])->columns(1)->addActionLabel('Add Product'),
+                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.'),
+                                    ])
+                                    ->columns(1)
+                                    ->defaultItems(1)
+                                    ->minItems(1)
+                                    ->maxItems(1)
+                                    ->columnSpanFull()
+                                    ->disableItemCreation()
+                                    ->disableItemDeletion(),
+                            ])
+                            ->columns(1)
+                            ->addActionLabel('Add Product'),
                     ]),
-                RichEditor::make('detail_specification')->required()->columnSpanFull(),
-                Repeater::make('productPics')->label('PIC')->relationship()
+                RichEditor::make('detail_specification')
+                    ->required()
+                    ->columnSpanFull()
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50']),
+                Repeater::make('productPics')
+                    ->label('PIC')
+                    ->relationship()
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
                         TextInput::make('pic_name')
                             ->label('Nama PIC')
                             ->required(),
-                        static::getSignature()->columnSpanFull(),
-                    ])->columns(2)->defaultItems(1)->minItems(1)->maxItems(1)->columnSpanFull()->disableItemCreation()->disableItemDeletion()
+                        static::getSignature()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->defaultItems(1)
+                    ->minItems(1)
+                    ->maxItems(1)
+                    ->columnSpanFull()
+                    ->disableItemCreation()
+                    ->disableItemDeletion(),
             ]);
     }
 
@@ -118,12 +163,23 @@ class SpesifikasiProductResource extends Resource
     {
         return $table
             ->columns([
-                //
-                TextColumn::make('urs.customer.name')->searchable()->sortable(),
-                TextColumn::make('urs.no_urs')->label('No URS')->searchable()->sortable(),
-                TextColumn::make('date')->searchable()->sortable(),
-                TextColumn::make('delivery_address')->searchable()->sortable(),
-                TextColumn::make('specificationProducts.detailInformation.file_path')->searchable()->sortable()->label('File')
+                TextColumn::make('urs.customer.name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('urs.no_urs')
+                    ->label('No URS')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('date')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('delivery_address')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('specificationProducts.detailInformation.file_path')
+                    ->searchable()
+                    ->sortable()
+                    ->label('File')
                     ->formatStateUsing(fn($state) => $state ? basename($state) : '-'),
             ])
             ->filters([
@@ -131,8 +187,11 @@ class SpesifikasiProductResource extends Resource
             ])
             ->actions([
                 ActionGroup::make([
-                    Tables\Actions\ViewAction::make()->color('success'),
-                    Tables\Actions\EditAction::make()->slideOver()->color('warning'),
+                    Tables\Actions\ViewAction::make()
+                        ->color('success'),
+                    Tables\Actions\EditAction::make()
+                        ->slideOver()
+                        ->color('warning'),
                     Tables\Actions\DeleteAction::make()
                         ->successNotification(null)
                         ->after(function ($record) {
@@ -154,6 +213,7 @@ class SpesifikasiProductResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
+
             ->schema([]);
     }
 

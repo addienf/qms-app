@@ -26,9 +26,9 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 1. Clone repo ini:
 
     ```bash
-    git clone https://github.com/addienf/qms-app
+    git clone https://github.com/username/coba-git-merge.git
 
-    cd qms-app
+    cd coba-git-merge
     ```
 
 2. Install dependency JavaScript (untuk Vite / Mix)
