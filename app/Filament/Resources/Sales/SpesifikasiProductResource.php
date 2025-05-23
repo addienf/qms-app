@@ -46,23 +46,28 @@ class SpesifikasiProductResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make(4)
+                Section::make('URS')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
-                        Select::make('urs_id')
-                            ->label('No URS')
-                            ->required()
-                            ->relationship('urs', 'no_urs'),
-                        DatePicker::make('date')
-                            ->label('Tanggal Dibuat')
-                            ->required(),
-                        TextInput::make('delivery_address')
-                            ->required(),
-                        ToggleButtons::make('is_stock')
-                            ->boolean()
-                            ->required()
-                            ->inline()
-                            ->inlineLabel(false)
-                            ->label('Stock'),
+                        Grid::make(4)
+                            ->schema([
+                                Select::make('urs_id')
+                                    ->label('No URS')
+                                    ->required()
+                                    ->relationship('urs', 'no_urs'),
+                                DatePicker::make('date')
+                                    ->label('Tanggal Dibuat')
+                                    ->required(),
+                                TextInput::make('delivery_address')
+                                    ->required(),
+                                ToggleButtons::make('is_stock')
+                                    ->boolean()
+                                    ->required()
+                                    ->inline()
+                                    ->inlineLabel(false)
+                                    ->label('Stock')
+                                    ->extraAttributes(['class' => 'text-white'])
+                            ]),
                     ]),
                 Section::make('Product Request')
                     ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
@@ -134,28 +139,33 @@ class SpesifikasiProductResource extends Resource
                             ->columns(1)
                             ->addActionLabel('Add Product'),
                     ]),
-                RichEditor::make('detail_specification')
-                    ->required()
-                    ->columnSpanFull()
-                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50']),
-                Repeater::make('productPics')
-                    ->label('PIC')
-                    ->relationship()
+                Section::make('Detail Specification')
                     ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
-                        TextInput::make('pic_name')
-                            ->label('Nama PIC')
-                            ->required(),
-                        static::getSignature()
-                            ->columnSpanFull(),
+                        RichEditor::make('detail_specification')
+                            ->required()
+                            ->columnSpanFull()
+                    ]),
+                Section::make('PIC')
+                    ->schema([
+                        Repeater::make('productPics')
+                            ->relationship()
+                            ->schema([
+                                TextInput::make('pic_name')
+                                    ->label('Nama PIC')
+                                    ->required(),
+                                static::getSignature()
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(1)
+                            ->minItems(1)
+                            ->maxItems(1)
+                            ->columnSpanFull()
+                            ->disableItemCreation()
+                            ->disableItemDeletion(),
                     ])
-                    ->columns(2)
-                    ->defaultItems(1)
-                    ->minItems(1)
-                    ->maxItems(1)
-                    ->columnSpanFull()
-                    ->disableItemCreation()
-                    ->disableItemDeletion(),
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50']),
             ]);
     }
 
