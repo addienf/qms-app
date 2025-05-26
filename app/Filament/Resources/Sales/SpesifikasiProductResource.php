@@ -20,6 +20,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -30,6 +32,8 @@ use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists;
+use Filament\Infolists\Components\Fieldset as ComponentsFieldset;
+use Filament\Infolists\Components\Grid as ComponentsGrid;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -127,12 +131,12 @@ class SpesifikasiProductResource extends Resource
                                             ->inline()
                                             ->inlineLabel(false)
                                             ->label('Nilai')
-                                            ->visible(fn($get) => in_array($get('name'), ['water_feeding_system', 'software']))
+                                            ->visible(fn($get) => in_array($get('name'), ['Water Feeding System', 'Software']))
                                             ->columnSpan(1),
                                         TextInput::make('value')
                                             ->required()
                                             ->label('Nilai')
-                                            ->visible(fn($get) => !in_array($get('name'), ['water_feeding_system', 'software']))
+                                            ->visible(fn($get) => !in_array($get('name'), ['Water Feeding System', 'Software']))
                                             ->columnSpan(1),
                                     ])
                                     ->columns(2)
@@ -213,7 +217,87 @@ class SpesifikasiProductResource extends Resource
     {
         return $infolist
 
-            ->schema([]);
+            ->schema([
+                ComponentsFieldset::make('Detail Information')
+                    ->schema([
+                        TextEntry::make('urs.no_urs')
+                            ->label('No URS'),
+                        TextEntry::make('urs.customer.name')
+                            ->label('Name'),
+                        TextEntry::make('urs.customer.department')
+                            ->label('Department'),
+                        TextEntry::make('urs.customer.phone_number')
+                            ->label('Phone Number'),
+                        TextEntry::make('urs.customer.company_name')
+                            ->label('Company Name'),
+                        TextEntry::make('urs.customer.company_address')
+                            ->label('Company Address'),
+                    ]),
+                ComponentsFieldset::make('Product Request')
+                    ->schema([
+                        RepeatableEntry::make('detailSpecifications')
+                            ->schema([
+                                ComponentsGrid::make(2)
+                                    ->schema([
+                                        TextEntry::make('product.product_name')
+                                            ->label('Product Name'),
+                                        TextEntry::make('product.category.name')
+                                            ->label('Product Category'),
+                                        ComponentsFieldset::make('detailInformation')
+                                            ->label('File Pendukung')
+                                            ->schema([
+                                                TextEntry::make('detailInformation.file_path')
+                                                    ->label('Lampiran')
+                                                    ->url(fn($record) => Storage::url($record->detailInformation?->file_path))
+                                                    ->openUrlInNewTab()
+                                            ])
+                                    ]),
+                                RepeatableEntry::make('specification')
+                                    ->label('Specification')
+                                    ->schema([
+                                        ComponentsGrid::make(2)
+                                            ->schema([
+                                                TextEntry::make('name')->label('Jenis Spesifikasi'),
+                                                TextEntry::make('value')->label('Nilai')
+                                                    ->badge()
+                                                    ->color(function ($state) {
+                                                        if ($state === '1') {
+                                                            return 'success';
+                                                        } elseif ($state === '0') {
+                                                            return 'danger';
+                                                        } else {
+                                                            return null;
+                                                        }
+                                                    })
+                                                    ->formatStateUsing(function ($state) {
+                                                        if ($state === '1') {
+                                                            return 'Yes';
+                                                        } elseif ($state === '0') {
+                                                            return 'No';
+                                                        } else {
+                                                            return $state;
+                                                        }
+                                                    }),
+                                            ])
+                                    ])
+                            ])->columnSpanFull()
+                    ]),
+                ComponentsFieldset::make('PIC')
+                    ->schema([
+                        ImageEntry::make('productPic.pic_signature')
+                            ->label('Tanda Tangan')
+                            ->inlineLabel()
+                            ->width(100)
+                            ->height(50),
+                        TextEntry::make('productPic.pic_name')
+                            ->inlineLabel()
+                            ->label('Dibuat Oleh'),
+                        TextEntry::make('date')
+                            ->inlineLabel()
+                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('d F Y'))
+                            ->label('Tanggal Dibuat'),
+                    ])->columns(1),
+            ]);
     }
 
     public static function getRelations(): array

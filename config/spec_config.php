@@ -1,12 +1,12 @@
 <?php
 return [
     'spesifikasi' => [
-        'temperature' => 'Temperature',
-        'humidity' => 'Humidity',
-        'room_dimension' => 'Room Dimension',
-        'capacity_of_chamber' => 'Capacity of Chamber',
-        'rack_quantity' => 'Rack Quantity',
-        'water_feeding_system' => 'Water Feeding System',
-        'software' => 'Software',
+        'Temperature' => 'Temperature',
+        'Humidity' => 'Humidity',
+        'Room Dimension' => 'Room Dimension',
+        'Capacity of Chamber' => 'Capacity of Chamber',
+        'Rack Quantity' => 'Rack Quantity',
+        'Water Feeding System' => 'Water Feeding System',
+        'Software' => 'Software',
     ]
 ];
