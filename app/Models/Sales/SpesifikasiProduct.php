@@ -30,12 +30,12 @@ class SpesifikasiProduct extends Model
         return $this->belongsTo(URS::class);
     }
 
-    public function productPics()
+    public function productPic()
     {
-        return $this->hasMany(SpesifikasiProductPIC::class);
+        return $this->hasOne(SpesifikasiProductPIC::class);
     }
 
-    public function specificationProducts()
+    public function detailSpecifications()
     {
         return $this->hasMany(SpesifikasiProductDetail::class);
     }
@@ -43,16 +43,12 @@ class SpesifikasiProduct extends Model
     protected static function booted()
     {
         static::deleting(function ($spesifikasi) {
-            foreach ($spesifikasi->specificationProducts as $detail) {
-                if ($detail->detailInformation) {
-                    $detail->detailInformation->delete();
-                }
+            foreach ($spesifikasi->detailSpecifications as $detail) {
                 $detail->delete();
             }
 
-            // Delete all PICs
-            foreach ($spesifikasi->productPics as $pic) {
-                $pic->delete();
+            if ($spesifikasi->productPic) {
+                $spesifikasi->productPic->delete();
             }
         });
     }

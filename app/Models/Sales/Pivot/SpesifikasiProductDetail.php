@@ -18,7 +18,7 @@ class SpesifikasiProductDetail extends Model
         'specification' => 'array',
     ];
 
-    public function spesifikasi_product()
+    public function specificationDetail()
     {
         return $this->belongsTo(SpesifikasiProduct::class);
     }
@@ -32,18 +32,11 @@ class SpesifikasiProductDetail extends Model
     {
         return $this->hasOne(DetailInformation::class);
     }
-
     protected static function booted()
     {
-        static::deleting(function ($detail) {
-            if ($detail->detailInformation) {
-                $filePath = $detail->detailInformation->file_path;
-
-                if ($filePath && Storage::disk('public')->exists($filePath)) {
-                    Storage::disk('public')->delete($filePath);
-                }
-
-                $detail->detailInformation->delete();
+        static::deleting(function ($model) {
+            if ($model->detailInformation) {
+                $model->detailInformation->delete();
             }
         });
     }
