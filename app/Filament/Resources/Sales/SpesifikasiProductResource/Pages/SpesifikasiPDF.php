@@ -11,7 +11,7 @@ class SpesifikasiPDF extends Page
     protected static string $resource = SpesifikasiProductResource::class;
 
     protected static string $view = 'filament.resources.sales.spesifikasi-product-resource.pages.spesifikasi-pdf';
-
+    protected static ?string $title = 'Spesifikasi Produk PDF';
     public $record;
     public $spesifikasi;
 
@@ -20,4 +20,5 @@ class SpesifikasiPDF extends Page
         $this->record = $record;
         $this->spesifikasi = SpesifikasiProduct::with(['urs', 'productPic', 'detailSpecifications'])->find($record);
     }
+
 }
