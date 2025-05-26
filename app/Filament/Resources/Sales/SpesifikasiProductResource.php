@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Sales;
 
 use App\Filament\Resources\Sales\SpesifikasiProductResource\Pages;
+use App\Filament\Resources\Sales\SpesifikasiProductResource\Pages\SpesifikasiPDF;
 use App\Filament\Resources\Sales\SpesifikasiProductResource\RelationManagers;
 use App\Models\Sales\Pivot\SpesifikasiProductPIC;
 use App\Models\Sales\SpesifikasiProduct;
@@ -37,6 +38,7 @@ use Filament\Infolists\Components\Grid as ComponentsGrid;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
@@ -189,6 +191,11 @@ class SpesifikasiProductResource extends Resource
                 //
             ])
             ->actions([
+                Action::make('pdf_view')
+                    ->label(_('View PDF'))
+                    ->icon('heroicon-o-document')
+                    ->color('success')
+                    ->url(fn($record) => self::getUrl('pdfView', ['record' => $record->id])),
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make()
                         ->color('success'),
@@ -313,6 +320,7 @@ class SpesifikasiProductResource extends Resource
             'index' => Pages\ListSpesifikasiProducts::route('/'),
             'create' => Pages\CreateSpesifikasiProduct::route('/create'),
             'edit' => Pages\EditSpesifikasiProduct::route('/{record}/edit'),
+            'pdfView' => Pages\SpesifikasiPDF::route('/{record}/pdfView')
         ];
     }
 
