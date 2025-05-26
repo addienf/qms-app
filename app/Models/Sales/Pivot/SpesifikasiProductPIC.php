@@ -42,8 +42,36 @@ class SpesifikasiProductPIC extends Model
         return $relativePath;
     }
 
+    public static function convertBase64ToJpg2($base64String, $filename = null, $path)
+    {
+        if (preg_match('/^data:image\/(png|jpeg|jpg);base64,/', $base64String)) {
+            $base64String = preg_replace('/^data:image\/(png|jpeg|jpg);base64,/', '', $base64String);
+        }
+
+        // Decode Base64
+        $base64String = str_replace(' ', '+', $base64String);
+        $imageData = base64_decode($base64String);
+
+        // Simpan ke storage
+        Storage::disk('public')->put($path . '/' . $filename, $imageData);
+
+        $newPath = $path . '/' . $filename;
+
+        return $newPath;
+    }
+
     protected static function booted(): void
     {
+        static::updating(function ($model) {
+            if (
+                $model->isDirty('pic_signature') &&
+                $model->getOriginal('pic_signature') &&
+                Storage::disk('public')->exists($model->getOriginal('pic_signature'))
+            ) {
+                Storage::disk('public')->delete($model->getOriginal('pic_signature'));
+            }
+        });
+
         static::deleting(function ($model) {
             if ($model->pic_signature && Storage::disk('public')->exists($model->pic_signature)) {
                 Storage::disk('public')->delete($model->pic_signature);

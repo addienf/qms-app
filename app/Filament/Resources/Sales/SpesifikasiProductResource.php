@@ -8,8 +8,11 @@ use App\Models\Sales\Pivot\SpesifikasiProductPIC;
 use App\Models\Sales\SpesifikasiProduct;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
@@ -23,12 +26,15 @@ use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Icetalker\FilamentTableRepeater\Forms\Components\TableRepeater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 use Illuminate\Support\Facades\Storage;
 
@@ -72,25 +78,41 @@ class SpesifikasiProductResource extends Resource
                 Section::make('Product Request')
                     ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
                     ->schema([
-                        Repeater::make('specificationProducts')
-                            ->label('Pilih Product')
+                        Repeater::make('detailSpecifications')
+                            ->label('')
                             ->relationship()
                             ->schema([
-                                Grid::make(2)
+                                Fieldset::make('Pilih Product')
                                     ->schema([
-                                        Select::make('product_id')
-                                            ->label('Product')
-                                            ->required()
-                                            ->relationship('product', 'product_name')
-                                            ->columnSpan(1),
+                                        Grid::make(2)
+                                            ->schema([
+                                                Select::make('product_id')
+                                                    ->label('Product')
+                                                    ->required()
+                                                    ->relationship('product', 'product_name')
+                                                    ->columnSpan(1),
 
-                                        TextInput::make('quantity')
-                                            ->numeric()
-                                            ->default(1)
-                                            ->required()
-                                            ->columnSpan(1),
+                                                TextInput::make('quantity')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->required()
+                                                    ->columnSpan(1),
+
+                                                Fieldset::make('detailInformation')
+                                                    ->label('File Pendukung')
+                                                    ->relationship('detailInformation')
+                                                    ->schema([
+                                                        FileUpload::make('file_path')
+                                                            ->label('File Pendukung')
+                                                            ->directory('Sales/Spesifikasi/Files')
+                                                            ->acceptedFileTypes(['application/pdf'])
+                                                            ->maxSize(10240)
+                                                            ->columnSpanFull()
+                                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.'),
+                                                    ])
+                                            ]),
                                     ]),
-                                Repeater::make('specification')
+                                TableRepeater::make('specification')
                                     ->label('Pilih Spesifikasi')
                                     ->schema([
                                         Select::make('name')
@@ -117,55 +139,27 @@ class SpesifikasiProductResource extends Resource
                                     ->defaultItems(1)
                                     ->columnSpanFull()
                                     ->addActionLabel('Add Specification'),
-                                Repeater::make('detailInformation')
-                                    ->label('Detail Information')
-                                    ->relationship()
-                                    ->schema([
-                                        FileUpload::make('file_path')
-                                            ->label('File Pendukung')
-                                            ->directory('Sales/Spesifikasi/Document')
-                                            ->acceptedFileTypes(['application/pdf'])
-                                            ->maxSize(10240)
-                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.'),
-                                    ])
-                                    ->columns(1)
-                                    ->defaultItems(1)
-                                    ->minItems(1)
-                                    ->maxItems(1)
-                                    ->columnSpanFull()
-                                    ->disableItemCreation()
-                                    ->disableItemDeletion(),
                             ])
                             ->columns(1)
                             ->addActionLabel('Add Product'),
                     ]),
-                Section::make('Detail Specification')
-                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
+                Fieldset::make('Detail Specification')
                     ->schema([
                         RichEditor::make('detail_specification')
                             ->required()
                             ->columnSpanFull()
                     ]),
-                Section::make('PIC')
+                Fieldset::make('productPic')
+                    ->label('PIC')
+                    ->relationship('productPic')
                     ->schema([
-                        Repeater::make('productPics')
-                            ->relationship()
-                            ->schema([
-                                TextInput::make('pic_name')
-                                    ->label('Nama PIC')
-                                    ->required(),
-                                static::getSignature()
-                                    ->columnSpanFull(),
-                            ])
-                            ->columns(2)
-                            ->defaultItems(1)
-                            ->minItems(1)
-                            ->maxItems(1)
-                            ->columnSpanFull()
-                            ->disableItemCreation()
-                            ->disableItemDeletion(),
-                    ])
-                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50']),
+                        Hidden::make('pic_name')
+                            ->default(Auth::user()->name)
+                            ->label('Nama PIC')
+                            ->required(),
+                        static::getSignature2()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -186,11 +180,6 @@ class SpesifikasiProductResource extends Resource
                 TextColumn::make('delivery_address')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('specificationProducts.detailInformation.file_path')
-                    ->searchable()
-                    ->sortable()
-                    ->label('File')
-                    ->formatStateUsing(fn($state) => $state ? basename($state) : '-'),
             ])
             ->filters([
                 //
@@ -243,22 +232,19 @@ class SpesifikasiProductResource extends Resource
         ];
     }
 
-    public static function getSignature(): SignaturePad
+    public static function getSignature2(): SignaturePad
     {
-        return SignaturePad::make('pic_signature')
-            ->label('Tanda Tangan')
-            ->reactive()
-            ->afterStateUpdated(function ($state, callable $set, $get, $livewire) {
-                if (!$state) {
+        return
+            SignaturePad::make('pic_signature')
+            ->label(__('Tanda Tangan'))
+            ->nullable()
+            ->afterStateUpdated(function ($state, $set) {
+                if (!$state && blank($state))
                     return;
-                }
-                $oldPath = null;
-                if ($livewire->record && $livewire->record->productPics) {
-                    $picModel = optional($livewire->record->productPics)->first();
-                    $oldPath = optional($picModel)->pic_signature;
-                }
-                $newPath = SpesifikasiProductPIC::handleSignature($state, $oldPath);
-                $set('pic_signature', $newPath);
+                $fileName = 'ttd_' . Str::random(10) . '.jpg';
+                $path = 'Sales/Spesifikasi/Signature/';
+                $imagePath = SpesifikasiProductPIC::convertBase64ToJpg2($state, $fileName, $path);
+                $set('pic_signature', $imagePath);
             });
     }
 }

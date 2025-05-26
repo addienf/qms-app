@@ -10,6 +10,7 @@
         "filament/filament": "3.3",
         "guzzlehttp/guzzle": "^7.2",
         "hugomyb/filament-media-action": "v3.1.1.7",
+        "icetalker/filament-table-repeater": "^1.4",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
