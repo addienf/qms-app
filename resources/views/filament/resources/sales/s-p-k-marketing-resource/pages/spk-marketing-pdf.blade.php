@@ -1,11 +1,10 @@
 <x-filament-panels::page>
     <x-filament::section>
-    {{ $spk_mkt }}
     <h2 class="mb-3 text-xl font-bold text-center">Detail Surat Perintah Kerja</h2>
-    
+
     <!-- Header Dokumen -->
     <div
-        class="flex flex-col w-full max-w-4xl text-sm text-center border border-black dark:border-gray-600 sm:flex-row mx-auto">
+        class="flex flex-col w-full max-w-4xl mx-auto text-sm text-center border border-black dark:border-gray-600 sm:flex-row">
         <div class="flex items-center justify-center w-24 h-24 p-2 border border-black dark:border-gray-600">
             <img src="{{ asset('asset/logo.png') }}" alt="Logo" class="object-contain w-16 h-16" />
         </div>
@@ -23,69 +22,74 @@
             Revisi:<br><span class="font-semibold">0</span>
         </div>
     </div>
-    
+
     <!-- Form Input -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm mb-6 pt-6 max-w-4xl mx-auto">
+    <div class="grid max-w-4xl grid-cols-1 pt-6 mx-auto mb-6 text-sm md:grid-cols-2 gap-x-6 gap-y-4">
         @php
             $fields = [
-                ['label' => 'No :', 'value' => ''],
-                ['label' => 'Nama :', 'value' => ''],
-                ['label' => 'Department :', 'value' => ''],
-                ['label' => 'Phone Number :', 'value' => ''],
-                ['label' => 'Company Name :', 'value' => ''],
-                ['label' => 'Company Address :', 'value' => ''],
+                ['label' => 'Tanggal :', 'value' => \Carbon\Carbon::parse($spk_mkt->tanggal)->translatedFormat('d F Y')],
+                ['label' => 'No SPK :', 'value' => $spk_mkt->no_spk],
+                ['label' => 'Customer :', 'value' => $spk_mkt->spesifikasiProduct->urs->customer->name],
+                ['label' => 'Dari :', 'value' => $spk_mkt->dari],
+                ['label' => 'No Order :', 'value' => $spk_mkt->no_order],
+                ['label' => 'Kepada :', 'value' => $spk_mkt->kepada],
             ];
         @endphp
-    
+
         @foreach ($fields as $field)
-            <div class="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
-                <label class="md:w-40 font-medium">{{ $field['label'] }}</label>
+            <div class="flex flex-col items-start gap-2 md:flex-row md:gap-4 md:items-center">
+                <label class="font-medium md:w-40">{{ $field['label'] }}</label>
                 <input type="text"
-                    class="w-full px-2 py-1 flex-1 border border-gray-300 dark:border-gray-600 rounded bg-white text-black dark:bg-gray-800 dark:text-white"
+                    class="flex-1 w-full px-2 py-1 text-black bg-white border border-gray-300 rounded cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                     value="{{ $field['value'] }}" />
             </div>
         @endforeach
     </div>
-    
+
     <!-- Tabel Produk -->
-    <div class="overflow-x-auto max-w-4xl mx-auto">
-        <table class="w-full border border-gray-300 dark:border-gray-600 text-sm text-left">
-            <thead class="bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
+    <div class="max-w-4xl mx-auto overflow-x-auto">
+        <table class="w-full text-sm text-left border border-gray-300 dark:border-gray-600">
+            <thead class="text-black bg-gray-100 dark:bg-gray-800 dark:text-white">
                 <tr>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Nomor</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Nama Produk</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Jumlah Pesanan</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">No URS</th>
-                    <th class="border border-gray-300 dark:border-gray-600 px-4 py-2">Rencana Pengiriman</th>
+                    <th class="px-4 py-2 border border-gray-300 dark:border-gray-600">Nomor</th>
+                    <th class="px-4 py-2 border border-gray-300 dark:border-gray-600">Nama Produk</th>
+                    <th class="px-4 py-2 border border-gray-300 dark:border-gray-600">Jumlah Pesanan</th>
+                    <th class="px-4 py-2 border border-gray-300 dark:border-gray-600">No URS</th>
+                    <th class="px-4 py-2 border border-gray-300 dark:border-gray-600">Rencana Pengiriman</th>
                 </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-900 text-black dark:text-white">
-                <tr>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">1</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">Produk A</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">10</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">URS-001</td>
-                    <td class="border border-gray-300 dark:border-gray-600 px-4 py-2">10 Juni 2025</td>
-                </tr>
-                <!-- Tambahkan baris lainnya jika perlu -->
+            <tbody class="text-black bg-white dark:bg-gray-900 dark:text-white">
+                @foreach ($spk_mkt->spesifikasiProduct->detailSpecifications as $item)
+                    <tr>
+                        <td class="px-4 py-2 border border-gray-300 dark:border-gray-600">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2 border border-gray-300 dark:border-gray-600">{{ $item->product->product_name }}</td>
+                        <td class="px-4 py-2 border border-gray-300 dark:border-gray-600">{{ $item->quantity }}</td>
+                        <td class="px-4 py-2 border border-gray-300 dark:border-gray-600">{{ $spk_mkt->spesifikasiProduct->urs->no_urs }}</td>
+                        <td class="px-4 py-2 border border-gray-300 dark:border-gray-600">{{ \Carbon\Carbon::parse($spk_mkt->spesifikasiProduct->date)->translatedFormat('d F Y') }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
-    
+
     <!-- Catatan & Tanda Tangan -->
-    <div class="mt-10 text-sm max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto mt-10 text-sm">
         <p class="mb-4 dark:text-white">*Salinan URS Wajib diberikan kepada Departemen Produksi</p>
-        <div class="flex justify-between items-start gap-4">
+        <div class="flex items-start justify-between gap-4">
             <!-- Kiri -->
             <div class="flex flex-col items-center">
-                <div class="w-32 h-32 border border-black dark:border-gray-600 mb-2"></div>
-                <p class="dark:text-white">Yang Membuat</p>
+                <p class="mb-2 dark:text-white">Yang Membuat</p>
+                <img src="{{ asset('storage/' . $spk_mkt->spkMarketingPIC->create_signature) }}" alt="Product Signature"
+                        class="h-20 w-80" />
+                <p class="mt-1 font-semibold dark:text-white">{{$spk_mkt->dari}}</p>
                 <p class="mt-1 font-semibold dark:text-white">Marketing</p>
             </div>
             <!-- Kanan -->
             <div class="flex flex-col items-center">
-                <div class="w-32 h-32 border border-black dark:border-gray-600 mb-2"></div>
-                <p class="dark:text-white">Yang Menerima</p>
+                <p class="mb-2 dark:text-white">Yang Menerima</p>
+                <img src="{{ asset('storage/' . $spk_mkt->spkMarketingPIC->recieve_signature) }}" alt="Product Signature"
+                        class="h-20 w-80" />
+                <p class="mt-1 font-semibold dark:text-white">{{$spk_mkt->kepada}}</p>
                 <p class="mt-1 font-semibold dark:text-white">Produksi</p>
             </div>
         </div>

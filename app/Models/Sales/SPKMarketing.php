@@ -12,6 +12,7 @@ class SPKMarketing extends Model
     protected $table = 'spk_marketings';
     protected $fillable = [
         'spesifikasi_product_id',
+        'no_spk',
         'tanggal',
         'no_order',
         'dari',
