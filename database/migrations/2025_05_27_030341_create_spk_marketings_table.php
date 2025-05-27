@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('spk_marketings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('spesifikasi_product_id')->constrained('spesifikasi_products')->onDelete('cascade');
+            $table->string('no_spk');
             $table->date('tanggal');
             $table->string('no_order');
             $table->string('dari');

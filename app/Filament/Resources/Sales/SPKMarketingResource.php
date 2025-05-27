@@ -10,6 +10,7 @@ use App\Models\Sales\SPKMarketing;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -24,6 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 use Filament\Forms\Components\Section;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\ActionGroup;
 
 class SPKMarketingResource extends Resource
 {
@@ -56,12 +59,16 @@ class SPKMarketingResource extends Resource
                                     });
                             }),
 
-                        TextInput::make('no_order')
-                            ->label('No Order')
+                        TextInput::make('no_spk')
+                            ->label('No SPK')
                             ->required(),
 
                         DatePicker::make('tanggal')
                             ->label('Tanggal Dibuat')
+                            ->required(),
+
+                        TextInput::make('no_order')
+                            ->label('No Order')
                             ->required(),
 
                         TextInput::make('dari')
@@ -122,7 +129,22 @@ class SPKMarketingResource extends Resource
                     ->icon('heroicon-o-document')
                     ->color('success')
                     ->url(fn($record) => self::getUrl('pdfView', ['record' => $record->id])),
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make()
+                        ->color('success'),
+                    Tables\Actions\EditAction::make()
+                        ->slideOver()
+                        ->color('warning'),
+                    Tables\Actions\DeleteAction::make()
+                        ->successNotification(null)
+                        ->after(function ($record) {
+                            Notification::make()
+                                ->title('SPK Marketing deleted successfully')
+                                ->body("The SPK Marketing \"{$record->no_spk}\" has been permanently removed.")
+                                ->danger()
+                                ->send();
+                        }),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -152,56 +174,33 @@ class SPKMarketingResource extends Resource
     {
         return
             SignaturePad::make('create_signature')
-                ->label(__('Tanda Tangan'))
-
-                ->nullable()
-                ->afterStateUpdated(function ($state, $set) {
-                    if (!$state || blank($state)) {
-                        return;
-                    }
-                    $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
-                    $path = 'Sales/SPK/Signature/';
-                    $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-                    if ($imagePath) {
-                        $set('create_signature', $imagePath);
-                    }
-                })
-                ->afterStateHydrated(fn($state, $set) => $set('create_signature', $state));
-        // ->afterStateUpdated(function ($state, $set) {
-        //     if (!$state && blank($state))
-        //         return;
-        //     $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
-        //     $path = 'Sales/SPK/Signature/';
-        //     $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-        //     $set('create_signature', $imagePath);
-        // });
+            ->label(__('Tanda Tangan'))
+            ->nullable()
+            ->afterStateUpdated(function ($state, $set) {
+                if (blank($state)) return;
+                $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
+                $path = 'Sales/SPK/Signature/';
+                $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+                if ($imagePath) {
+                    $set('create_signature', $imagePath);
+                }
+            });
     }
 
     public static function getSignatureRecieve(): SignaturePad
     {
         return
             SignaturePad::make('recieve_signature')
-                ->label(__('Tanda Tangan'))
-                ->nullable()
-                ->afterStateUpdated(function ($state, $set) {
-                    if (!$state || blank($state)) {
-                        return;
-                    }
-                    $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
-                    $path = 'Sales/SPK/Signature/';
-                    $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-                    if ($imagePath) {
-                        $set('recieve_signature', $imagePath);
-                    }
-                })
-                ->afterStateHydrated(fn($state, $set) => $set('recieve_signature', $state));
-        // ->afterStateUpdated(function ($state, $set) {
-        //     if (!$state && blank($state))
-        //         return;
-        //     $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
-        //     $path = 'Sales/SPK/Signature/';
-        //     $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-        //     $set('recieve_signature', $imagePath);
-        // });
+            ->label(__('Tanda Tangan'))
+            ->nullable()
+            ->afterStateUpdated(function ($state, $set) {
+                if (blank($state)) return;
+                $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
+                $path = 'Sales/SPK/Signature/';
+                $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+                if ($imagePath) {
+                    $set('recieve_signature', $imagePath);
+                }
+            });
     }
 }

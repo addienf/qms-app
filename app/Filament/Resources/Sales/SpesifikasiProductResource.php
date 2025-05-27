@@ -166,7 +166,7 @@ class SpesifikasiProductResource extends Resource
                                             ->default(Auth::user()->name)
                                             ->label('Nama PIC')
                                             ->required(),
-                                        static::getSignature2()
+                                        static::getSignature2(),
                                     ])->columnSpan(1),
                             ])->columns(2)
                     ]),
@@ -335,12 +335,13 @@ class SpesifikasiProductResource extends Resource
             ->label(__('Tanda Tangan'))
             ->nullable()
             ->afterStateUpdated(function ($state, $set) {
-                if (!$state && blank($state))
-                    return;
+                if (blank($state)) return;
                 $fileName = 'ttd_' . Str::random(10) . '.jpg';
                 $path = 'Sales/Spesifikasi/Signature/';
                 $imagePath = SpesifikasiProductPIC::convertBase64ToJpg2($state, $fileName, $path);
-                $set('pic_signature', $imagePath);
+                if ($imagePath) {
+                    $set('pic_signature', $imagePath);
+                }
             });
     }
 }
