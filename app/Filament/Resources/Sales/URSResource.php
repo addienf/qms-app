@@ -25,12 +25,15 @@ use Filament\Forms\Components\Section;
 class URSResource extends Resource
 {
     protected static ?string $model = URS::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Sales';
     protected static ?string $navigationLabel = 'URS';
     protected static ?string $pluralLabel = 'URS';
     protected static ?string $modelLabel = 'URS';
+    public static function getSlug(): string
+    {
+        return 'urs';
+    }
 
     public static function form(Form $form): Form
     {

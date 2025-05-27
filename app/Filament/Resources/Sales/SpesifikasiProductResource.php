@@ -151,20 +151,24 @@ class SpesifikasiProductResource extends Resource
                     ]),
                 Fieldset::make('Detail Specification')
                     ->schema([
-                        RichEditor::make('detail_specification')
-                            ->required()
-                            ->columnSpanFull()
-                    ]),
-                Fieldset::make('productPic')
-                    ->label('PIC')
-                    ->relationship('productPic')
-                    ->schema([
-                        Hidden::make('pic_name')
-                            ->default(Auth::user()->name)
-                            ->label('Nama PIC')
-                            ->required(),
-                        static::getSignature2()
-                            ->columnSpanFull(),
+                        Grid::make()
+                            ->columns([
+                                'sm' => 2,
+                            ])
+                            ->schema([
+                                RichEditor::make('detail_specification')
+                                    ->required()
+                                    ->columnSpan(1),
+                                Group::make()
+                                    ->relationship('productPic')
+                                    ->schema([
+                                        Hidden::make('pic_name')
+                                            ->default(Auth::user()->name)
+                                            ->label('Nama PIC')
+                                            ->required(),
+                                        static::getSignature2()
+                                    ])->columnSpan(1),
+                            ])->columns(2)
                     ]),
             ]);
     }
