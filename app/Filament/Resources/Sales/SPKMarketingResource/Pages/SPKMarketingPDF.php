@@ -11,7 +11,7 @@ class SPKMarketingPDF extends Page
     protected static string $resource = SPKMarketingResource::class;
 
     protected static string $view = 'filament.resources.sales.s-p-k-marketing-resource.pages.spk-marketing-pdf';
-    protected static ?string $title = 'Spesifikasi Produk PDF';
+    protected static ?string $title = 'SPK Marketing PDF';
     public $record;
     public $spk_mkt;
 

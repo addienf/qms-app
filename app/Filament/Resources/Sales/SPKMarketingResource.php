@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
+use Filament\Forms\Components\Section;
 
 class SPKMarketingResource extends Resource
 {
@@ -41,36 +42,52 @@ class SPKMarketingResource extends Resource
     {
         return $form
             ->schema([
-                //
-                Select::make('spesifikasi_product_id')
-                    ->label('Spesifikasi Product')
-                    ->required()
-                    ->options(function () {
-                        return SpesifikasiProduct::with('urs')
-                            ->get()
-                            ->mapWithKeys(function ($item) {
-                                return [$item->id => $item->urs->no_urs ?? '-'];
-                            });
-                    }),
-                TextInput::make('no_order')
-                    ->required(),
-                DatePicker::make('tanggal')
-                    ->label('Tanggal Dibuat')
-                    ->required(),
-                TextInput::make('dari')
-                    ->required(),
-                TextInput::make('kepada')
-                    ->required(),
-                Grid::make(2)
-                    ->relationship('spkMarketingPIC')
+                Section::make('Surat Perintah Kerja')
+                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50 '])
                     ->schema([
-                        TextInput::make('create_name')
+                        Select::make('spesifikasi_product_id')
+                            ->label('Spesifikasi Product')
+                            ->required()
+                            ->options(function () {
+                                return SpesifikasiProduct::with('urs')
+                                    ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        return [$item->id => $item->urs->no_urs ?? '-'];
+                                    });
+                            }),
+
+                        TextInput::make('no_order')
+                            ->label('No Order')
                             ->required(),
-                        TextInput::make('recieve_name')
+
+                        DatePicker::make('tanggal')
+                            ->label('Tanggal Dibuat')
                             ->required(),
-                        static::getSignatureCreate(),
-                        static::getSignatureRecieve()
-                    ])
+
+                        TextInput::make('dari')
+                            ->label('Dari')
+                            ->required(),
+
+                        TextInput::make('kepada')
+                            ->label('Kepada')
+                            ->required(),
+
+                        Grid::make(2)
+                            ->relationship('spkMarketingPIC')
+                            ->schema([
+                                TextInput::make('create_name')
+                                    ->label('Yang Membuat')
+                                    ->required(),
+
+                                TextInput::make('recieve_name')
+                                    ->label('Yang Menerima')
+                                    ->required(),
+
+                                static::getSignatureCreate(),
+
+                                static::getSignatureRecieve(),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -135,31 +152,56 @@ class SPKMarketingResource extends Resource
     {
         return
             SignaturePad::make('create_signature')
-            ->label(__('Tanda Tangan'))
-            ->nullable()
-            ->afterStateUpdated(function ($state, $set) {
-                if (!$state && blank($state))
-                    return;
-                $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
-                $path = 'Sales/SPK/Signature/';
-                $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-                $set('create_signature', $imagePath);
-            });
+                ->label(__('Tanda Tangan'))
+
+                ->nullable()
+                ->afterStateUpdated(function ($state, $set) {
+                    if (!$state || blank($state)) {
+                        return;
+                    }
+                    $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
+                    $path = 'Sales/SPK/Signature/';
+                    $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+                    if ($imagePath) {
+                        $set('create_signature', $imagePath);
+                    }
+                })
+                ->afterStateHydrated(fn($state, $set) => $set('create_signature', $state));
+        // ->afterStateUpdated(function ($state, $set) {
+        //     if (!$state && blank($state))
+        //         return;
+        //     $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
+        //     $path = 'Sales/SPK/Signature/';
+        //     $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+        //     $set('create_signature', $imagePath);
+        // });
     }
 
     public static function getSignatureRecieve(): SignaturePad
     {
         return
             SignaturePad::make('recieve_signature')
-            ->label(__('Tanda Tangan'))
-            ->nullable()
-            ->afterStateUpdated(function ($state, $set) {
-                if (!$state && blank($state))
-                    return;
-                $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
-                $path = 'Sales/SPK/Signature/';
-                $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
-                $set('recieve_signature', $imagePath);
-            });
+                ->label(__('Tanda Tangan'))
+                ->nullable()
+                ->afterStateUpdated(function ($state, $set) {
+                    if (!$state || blank($state)) {
+                        return;
+                    }
+                    $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
+                    $path = 'Sales/SPK/Signature/';
+                    $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+                    if ($imagePath) {
+                        $set('recieve_signature', $imagePath);
+                    }
+                })
+                ->afterStateHydrated(fn($state, $set) => $set('recieve_signature', $state));
+        // ->afterStateUpdated(function ($state, $set) {
+        //     if (!$state && blank($state))
+        //         return;
+        //     $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
+        //     $path = 'Sales/SPK/Signature/';
+        //     $imagePath = SPKMarketingPIC::convertBase64ToJpg2($state, $fileName, $path);
+        //     $set('recieve_signature', $imagePath);
+        // });
     }
 }
