@@ -40,6 +40,11 @@ class SpesifikasiProduct extends Model
         return $this->hasMany(SpesifikasiProductDetail::class);
     }
 
+    public function spkMarketing()
+    {
+        return $this->hasOne(SPKMarketing::class);
+    }
+
     protected static function booted()
     {
         static::deleting(function ($spesifikasi) {
