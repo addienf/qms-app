@@ -334,6 +334,8 @@ class SpesifikasiProductResource extends Resource
             SignaturePad::make('pic_signature')
             ->label(__('Tanda Tangan'))
             ->nullable()
+            ->exportPenColor('#0118D8')
+            ->confirmable()
             ->afterStateUpdated(function ($state, $set) {
                 if (blank($state)) return;
                 $fileName = 'ttd_' . Str::random(10) . '.jpg';
