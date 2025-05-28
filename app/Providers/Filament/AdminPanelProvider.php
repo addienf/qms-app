@@ -24,13 +24,11 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->spa()
             ->brandLogo(asset('asset/logo.png'))
             ->brandLogoHeight(height: '180px')
             ->default()
             ->id('admin')
             ->path('admin')
-            ->spa()
             ->login(LoginCustom::class)
             ->passwordReset()
             ->emailVerification()

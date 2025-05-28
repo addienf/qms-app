@@ -176,6 +176,8 @@ class SPKMarketingResource extends Resource
             SignaturePad::make('create_signature')
             ->label(__('Tanda Tangan'))
             ->nullable()
+            ->exportPenColor('#0118D8')
+            ->confirmable()
             ->afterStateUpdated(function ($state, $set) {
                 if (blank($state)) return;
                 $fileName = 'ttd_create_' . Str::random(10) . '.jpg';
@@ -193,6 +195,8 @@ class SPKMarketingResource extends Resource
             SignaturePad::make('recieve_signature')
             ->label(__('Tanda Tangan'))
             ->nullable()
+            ->exportPenColor('#0118D8')
+            ->confirmable()
             ->afterStateUpdated(function ($state, $set) {
                 if (blank($state)) return;
                 $fileName = 'ttd_recieve_' . Str::random(10) . '.jpg';
