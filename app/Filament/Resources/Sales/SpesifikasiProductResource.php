@@ -43,7 +43,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 use Illuminate\Support\Facades\Storage;
-
 class SpesifikasiProductResource extends Resource
 {
     protected static ?string $model = SpesifikasiProduct::class;
@@ -56,121 +55,129 @@ class SpesifikasiProductResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Section::make('URS')
-                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
-                    ->schema([
-                        Grid::make(4)
-                            ->schema([
-                                Select::make('urs_id')
-                                    ->label('No URS')
-                                    ->required()
-                                    ->relationship('urs', 'no_urs'),
-                                DatePicker::make('date')
-                                    ->label('Tanggal Dibuat')
-                                    ->required(),
-                                TextInput::make('delivery_address')
-                                    ->required(),
-                                ToggleButtons::make('is_stock')
-                                    ->boolean()
-                                    ->required()
-                                    ->inline()
-                                    ->inlineLabel(false)
-                                    ->label('Stock')
-                                    ->extraAttributes(['class' => 'text-white'])
-                            ]),
+        return $form->schema([
+            Section::make('URS')
+                ->extraAttributes([
+                    'class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'
+                ])
+                ->schema([
+                    Grid::make(4)->schema([
+                        Select::make('urs_id')
+                            ->label('No URS')
+                            ->required()
+                            ->relationship('urs', 'no_urs'),
+
+                        DatePicker::make('date')
+                            ->label('Tanggal Dibuat')
+                            ->required(),
+
+                        TextInput::make('delivery_address')
+                            ->required(),
+
+                        ToggleButtons::make('is_stock')
+                            ->boolean()
+                            ->required()
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->label('Stock')
+                            ->extraAttributes(['class' => 'text-white']),
                     ]),
-                Section::make('Product Request')
-                    ->extraAttributes(['class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'])
-                    ->schema([
-                        Repeater::make('detailSpecifications')
-                            ->label('')
-                            ->relationship()
-                            ->schema([
-                                Fieldset::make('Pilih Product')
-                                    ->schema([
-                                        Grid::make(2)
+                ]),
+
+            Section::make('Product Request')
+                ->extraAttributes([
+                    'class' => 'border-2 border-blue-300 rounded-md dark:border-blue-50'
+                ])
+                ->schema([
+                    Repeater::make('detailSpecifications')
+                        ->label('')
+                        ->relationship()
+                        ->schema([
+                            Fieldset::make('Pilih Product')
+                                ->schema([
+                                    Grid::make(2)->schema([
+                                        Select::make('product_id')
+                                            ->label('Product')
+                                            ->required()
+                                            ->relationship('product', 'product_name')
+                                            ->columnSpan(1),
+
+                                        TextInput::make('quantity')
+                                            ->numeric()
+                                            ->default(1)
+                                            ->required()
+                                            ->columnSpan(1),
+
+                                        Fieldset::make('detailInformation')
+                                            ->label('Masukkan File Pendukung')
+                                            ->relationship('detailInformation')
                                             ->schema([
-                                                Select::make('product_id')
-                                                    ->label('Product')
-                                                    ->required()
-                                                    ->relationship('product', 'product_name')
-                                                    ->columnSpan(1),
-
-                                                TextInput::make('quantity')
-                                                    ->numeric()
-                                                    ->default(1)
-                                                    ->required()
-                                                    ->columnSpan(1),
-
-                                                Fieldset::make('detailInformation')
-                                                    ->label('File Pendukung')
-                                                    ->relationship('detailInformation')
-                                                    ->schema([
-                                                        FileUpload::make('file_path')
-                                                            ->label('File Pendukung')
-                                                            ->directory('Sales/Spesifikasi/Files')
-                                                            ->acceptedFileTypes(['application/pdf'])
-                                                            ->maxSize(10240)
-                                                            ->columnSpanFull()
-                                                            ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.'),
-                                                    ])
+                                                FileUpload::make('file_path')
+                                                    ->label('')
+                                                    ->directory('Sales/Spesifikasi/Files')
+                                                    ->acceptedFileTypes(['application/pdf'])
+                                                    ->maxSize(10240)
+                                                    ->columnSpanFull()
+                                                    ->helperText('Hanya file PDF yang diperbolehkan. Maksimal ukuran 10 MB.'),
                                             ]),
                                     ]),
-                                TableRepeater::make('specification')
-                                    ->label('Pilih Spesifikasi')
-                                    ->schema([
-                                        Select::make('name')
-                                            ->reactive()
-                                            ->required()
-                                            ->label('Jenis Spesifiaksi')
-                                            ->options(config('spec_config.spesifikasi'))
-                                            ->columnSpan(1),
-                                        ToggleButtons::make('value')
-                                            ->boolean()
-                                            ->required()
-                                            ->inline()
-                                            ->inlineLabel(false)
-                                            ->label('Nilai')
-                                            ->visible(fn($get) => in_array($get('name'), ['Water Feeding System', 'Software']))
-                                            ->columnSpan(1),
-                                        TextInput::make('value')
-                                            ->required()
-                                            ->label('Nilai')
-                                            ->visible(fn($get) => !in_array($get('name'), ['Water Feeding System', 'Software']))
-                                            ->columnSpan(1),
-                                    ])
-                                    ->columns(2)
-                                    ->defaultItems(1)
-                                    ->columnSpanFull()
-                                    ->addActionLabel('Add Specification'),
-                            ])
-                            ->columns(1)
-                            ->addActionLabel('Add Product'),
-                    ]),
-                Fieldset::make('Detail Specification')
-                    ->schema([
-                        Grid::make()
-                            ->columns([
-                                'sm' => 2,
-                            ])
+                                ]),
+
+                            TableRepeater::make('specification')
+                                ->label('Pilih Spesifikasi')
+                                ->schema([
+                                    Select::make('name')
+                                        ->reactive()
+                                        ->required()
+                                        ->label('Jenis Spesifikasi')
+                                        ->options(config('spec_config.spesifikasi'))
+                                        ->columnSpan(1),
+
+                                    ToggleButtons::make('value')
+                                        ->boolean()
+                                        ->required()
+                                        ->inline()
+                                        ->inlineLabel(false)
+                                        ->label('Nilai')
+                                        ->visible(fn($get) => in_array($get('name'), ['Water Feeding System', 'Software']))
+                                        ->columnSpan(1),
+
+                                    TextInput::make('value')
+                                        ->required()
+                                        ->label('Nilai')
+                                        ->visible(fn($get) => !in_array($get('name'), ['Water Feeding System', 'Software']))
+                                        ->columnSpan(1),
+                                ])
+                                ->columns(2)
+                                ->defaultItems(1)
+                                ->columnSpanFull()
+                                ->addActionLabel('Add Specification'),
+                        ])
+                        ->columns(1)
+                        ->addActionLabel('Add Product'),
+                ]),
+
+            Fieldset::make('Detail Specification')
+                ->schema([
+                    Grid::make()->columns(['sm' => 2])->schema([
+                        RichEditor::make('detail_specification')
+                            ->required()
+                            ->helperText('Berikan penjelasan tentang produk ini.')
+                            ->columnSpan(1),
+
+                        Group::make()
+                            ->relationship('productPic')
                             ->schema([
-                                RichEditor::make('detail_specification')
-                                    ->required()
-                                    ->columnSpan(1),
-                                Group::make()
-                                    ->relationship('productPic')
-                                    ->schema([
-                                        Hidden::make('pic_name')
-                                            ->default(Auth::user()->name)
-                                            ->label('Nama PIC')
-                                            ->required(),
-                                        static::getSignature2(),
-                                    ])->columnSpan(1),
-                            ])->columns(2)
-                    ]),
-            ]);
+                                Hidden::make('pic_name')
+                                    ->default(Auth::user()->name)
+                                    ->label('Nama PIC')
+                                    ->required(),
+
+                                static::getSignature2(),
+                            ])->columnSpan(1),
+                    ])->columns(2),
+                ]),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -180,32 +187,36 @@ class SpesifikasiProductResource extends Resource
                 TextColumn::make('urs.customer.name')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('urs.no_urs')
                     ->label('No URS')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('date')
                     ->searchable()
                     ->sortable(),
+
                 TextColumn::make('delivery_address')
                     ->searchable()
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->actions([
                 Action::make('pdf_view')
                     ->label(_('View PDF'))
                     ->icon('heroicon-o-document')
                     ->color('success')
                     ->url(fn($record) => self::getUrl('pdfView', ['record' => $record->id])),
+
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make()
                         ->color('success'),
+
                     Tables\Actions\EditAction::make()
                         ->slideOver()
                         ->color('warning'),
+
                     Tables\Actions\DeleteAction::make()
                         ->successNotification(null)
                         ->after(function ($record) {
@@ -226,96 +237,67 @@ class SpesifikasiProductResource extends Resource
 
     public static function infolist(Infolist $infolist): Infolist
     {
-        return $infolist
+        return $infolist->schema([
+            ComponentsFieldset::make('Detail Information')->schema([
+                TextEntry::make('urs.no_urs')->label('No URS'),
+                TextEntry::make('urs.customer.name')->label('Name'),
+                TextEntry::make('urs.customer.department')->label('Department'),
+                TextEntry::make('urs.customer.phone_number')->label('Phone Number'),
+                TextEntry::make('urs.customer.company_name')->label('Company Name'),
+                TextEntry::make('urs.customer.company_address')->label('Company Address'),
+            ]),
 
-            ->schema([
-                ComponentsFieldset::make('Detail Information')
-                    ->schema([
-                        TextEntry::make('urs.no_urs')
-                            ->label('No URS'),
-                        TextEntry::make('urs.customer.name')
-                            ->label('Name'),
-                        TextEntry::make('urs.customer.department')
-                            ->label('Department'),
-                        TextEntry::make('urs.customer.phone_number')
-                            ->label('Phone Number'),
-                        TextEntry::make('urs.customer.company_name')
-                            ->label('Company Name'),
-                        TextEntry::make('urs.customer.company_address')
-                            ->label('Company Address'),
-                    ]),
-                ComponentsFieldset::make('Product Request')
-                    ->schema([
-                        RepeatableEntry::make('detailSpecifications')
+            ComponentsFieldset::make('Product Request')->schema([
+                RepeatableEntry::make('detailSpecifications')->schema([
+                    ComponentsGrid::make(2)->schema([
+                        TextEntry::make('product.product_name')->label('Product Name'),
+                        TextEntry::make('product.category.name')->label('Product Category'),
+
+                        ComponentsFieldset::make('detailInformation')
+                            ->label('File Pendukung')
                             ->schema([
-                                ComponentsGrid::make(2)
-                                    ->schema([
-                                        TextEntry::make('product.product_name')
-                                            ->label('Product Name'),
-                                        TextEntry::make('product.category.name')
-                                            ->label('Product Category'),
-                                        ComponentsFieldset::make('detailInformation')
-                                            ->label('File Pendukung')
-                                            ->schema([
-                                                TextEntry::make('detailInformation.file_path')
-                                                    ->label('Lampiran')
-                                                    ->url(fn($record) => Storage::url($record->detailInformation?->file_path))
-                                                    ->openUrlInNewTab()
-                                            ])
-                                    ]),
-                                RepeatableEntry::make('specification')
-                                    ->label('Specification')
-                                    ->schema([
-                                        ComponentsGrid::make(2)
-                                            ->schema([
-                                                TextEntry::make('name')->label('Jenis Spesifikasi'),
-                                                TextEntry::make('value')->label('Nilai')
-                                                    ->badge()
-                                                    ->color(function ($state) {
-                                                        if ($state === '1') {
-                                                            return 'success';
-                                                        } elseif ($state === '0') {
-                                                            return 'danger';
-                                                        } else {
-                                                            return null;
-                                                        }
-                                                    })
-                                                    ->formatStateUsing(function ($state) {
-                                                        if ($state === '1') {
-                                                            return 'Yes';
-                                                        } elseif ($state === '0') {
-                                                            return 'No';
-                                                        } else {
-                                                            return $state;
-                                                        }
-                                                    }),
-                                            ])
-                                    ])
-                            ])->columnSpanFull()
+                                TextEntry::make('detailInformation.file_path')
+                                    ->label('Lampiran')
+                                    ->url(fn($record) => Storage::url($record->detailInformation?->file_path))
+                                    ->openUrlInNewTab(),
+                            ]),
                     ]),
-                ComponentsFieldset::make('PIC')
-                    ->schema([
-                        ImageEntry::make('productPic.pic_signature')
-                            ->label('Tanda Tangan')
-                            ->inlineLabel()
-                            ->width(100)
-                            ->height(50),
-                        TextEntry::make('productPic.pic_name')
-                            ->inlineLabel()
-                            ->label('Dibuat Oleh'),
-                        TextEntry::make('date')
-                            ->inlineLabel()
-                            ->formatStateUsing(fn($state) => \Carbon\Carbon::parse($state)->translatedFormat('d F Y'))
-                            ->label('Tanggal Dibuat'),
-                    ])->columns(1),
-            ]);
+
+                    RepeatableEntry::make('specification')->label('Specification')->schema([
+                        ComponentsGrid::make(2)->schema([
+                            TextEntry::make('name')->label('Jenis Spesifikasi'),
+                            TextEntry::make('value')
+                                ->label('Nilai')
+                                ->badge()
+                                ->color(fn($state) => $state === '1' ? 'success' : ($state === '0' ? 'danger' : null))
+                                ->formatStateUsing(fn($state) => $state === '1' ? 'Yes' : ($state === '0' ? 'No' : $state)),
+                        ]),
+                    ]),
+                ])->columnSpanFull(),
+            ]),
+
+            ComponentsFieldset::make('PIC')->schema([
+                ImageEntry::make('productPic.pic_signature')
+                    ->label('Tanda Tangan')
+                    ->inlineLabel()
+                    ->width(100)
+                    ->height(50),
+
+                TextEntry::make('productPic.pic_name')
+                    ->inlineLabel()
+                    ->label('Dibuat Oleh'),
+
+                TextEntry::make('date')
+                    ->inlineLabel()
+                    ->label('Tanggal Dibuat')
+                    ->formatStateUsing(fn($state) => Carbon::parse($state)->translatedFormat('d F Y')),
+            ])->columns(1),
+        ]);
     }
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -324,23 +306,25 @@ class SpesifikasiProductResource extends Resource
             'index' => Pages\ListSpesifikasiProducts::route('/'),
             'create' => Pages\CreateSpesifikasiProduct::route('/create'),
             'edit' => Pages\EditSpesifikasiProduct::route('/{record}/edit'),
-            'pdfView' => Pages\SpesifikasiPDF::route('/{record}/pdfView')
+            'pdfView' => Pages\SpesifikasiPDF::route('/{record}/pdfView'),
         ];
     }
 
     public static function getSignature2(): SignaturePad
     {
-        return
-            SignaturePad::make('pic_signature')
+        return SignaturePad::make('pic_signature')
             ->label(__('Tanda Tangan'))
             ->nullable()
             ->exportPenColor('#0118D8')
             ->confirmable()
             ->afterStateUpdated(function ($state, $set) {
-                if (blank($state)) return;
+                if (blank($state))
+                    return;
+
                 $fileName = 'ttd_' . Str::random(10) . '.jpg';
                 $path = 'Sales/Spesifikasi/Signature/';
                 $imagePath = SpesifikasiProductPIC::convertBase64ToJpg2($state, $fileName, $path);
+
                 if ($imagePath) {
                     $set('pic_signature', $imagePath);
                 }
